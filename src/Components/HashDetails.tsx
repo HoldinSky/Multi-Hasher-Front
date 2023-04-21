@@ -13,16 +13,18 @@ import IHashResults from "../common/IHashResults";
 import {ExpandLess, ExpandMore} from "@mui/icons-material";
 import {useState} from "react";
 
+const open = [false, false, false];
 
 export default function HashDetails() {
     const location = useLocation();
     const {hashResult} = location.state;
     const data = hashResult as IHashResults
 
-    const [open, setOpen] = useState(true);
+    const [dummy, setDummy] = useState({});
 
-    const handleClick = () => {
-        setOpen(!open);
+    const handleClick = (num: number) => {
+        open[num] = !open[num];
+        setDummy({});
     };
 
     const hashes = Object.entries(data.results.hashes!!);
@@ -33,7 +35,7 @@ export default function HashDetails() {
             display={"grid"}
             justifyContent={"center"}
         >
-            <Card sx={{minWidth: 500}}>
+            <Card sx={{minWidth: 1200}}>
                 <CardContent>
                     <Typography sx={{fontSize: 14, my: 0}} color="text.secondary">
                         Result ID
@@ -66,28 +68,27 @@ export default function HashDetails() {
                     </Typography>
 
                     <List style={{display: hashes.length ? "block" : "none"}}>
-                        <ListItem sx={{px: 0}} key={"Title"}>
-                            <Typography sx={{fontSize: 14, my: 0}} color="text.secondary">
+                        <ListItem sx={{px: 0}} key={"title"}>
+                            <Typography sx={{fontSize: 14, my: 0}} key={"title-typography"} color="text.secondary">
                                 Hash results
                             </Typography>
                         </ListItem>
-                        {hashes.map(entry =>
-                            <>
-                                <ListItemButton onClick={handleClick} key={entry[0]}>
+                        {hashes.map((entry, index) =>
+                            <div key={"div-" + entry[0]}>
+                                <ListItemButton onClick={e => handleClick(index)} key={"button-" + entry[0]}>
                                     <ListItemText primary={entry[0]}/>
-                                    {open ? <ExpandLess/> : <ExpandMore/>}
+                                    {open[index] ? <ExpandLess/> : <ExpandMore/>}
                                 </ListItemButton>
-                                <Collapse in={open} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        {Object.entries(entry[1]).map(value => {
-                                            console.log(``, value[0][24]);
-                                            return <Typography variant="h6" component="div" key={value[0]}>
-                                                {(value[0].length > 25 ? value[0].slice(0, 25) + "..." : value[0]) + " - " + value[1]}
-                                            </Typography> }
+                                <Collapse in={open[index]} timeout="auto" unmountOnExit key={"collapse-" + entry[0]}>
+                                    <List component="div" disablePadding key={"sublist-" + entry[0]}>
+                                        {Object.entries(entry[1]).map(value =>
+                                            <Typography variant="h6" component="div" key={value[0]}>
+                                                {(value[0].length > 25 ? (value[0].slice(0, 15) + "..." + value[0].slice(-9)) : value[0]) + " - " + value[1]}
+                                            </Typography>
                                         )}
                                     </List>
                                 </Collapse>
-                            </>
+                            </div>
                         )}
                     </List>
 

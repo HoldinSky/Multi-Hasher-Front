@@ -29,7 +29,11 @@ function TasksInProgress(props: TaskInProgressProps) {
                         key={entry.taskId}
                     >
                         <ListItemText
-                            primary={"Task ID: " + entry.taskId + ", Hash types: " + entry.hashTypes + ", Content: " + entry.path + ", Progress: " + entry.progress + "%"}
+                            primary={"Task ID: " + entry.taskId +
+                                ", Hash types: " + entry.hashTypes +
+                                ", Content: " + entry.path +
+                                ", Progress: " + entry.progress +
+                                "%, Speed: " + entry.speed + " MB/s"}
                         />
                     </ListItem>
                     );

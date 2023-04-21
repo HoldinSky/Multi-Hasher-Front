@@ -1,4 +1,4 @@
-import {FormEvent, MouseEvent, useEffect, useRef, useState} from "react";
+import {ChangeEvent, FormEvent, MouseEvent, useEffect, useRef, useState} from "react";
 import {
     Box,
     Button, Checkbox,
@@ -22,7 +22,7 @@ const STOP_REQUEST_URL: string = "http://localhost:8888/hashing/stop";
 export interface IHashRequest {
     taskId: number,
     fullPath: string,
-    hashTypes: Object
+    hashTypes: string[]
 }
 
 export interface ITaskInProgress {
@@ -30,6 +30,13 @@ export interface ITaskInProgress {
     path: string;
     hashTypes: string;
     progress: number;
+    speed: number;
+}
+
+enum HashType {
+    MD5 = "MD5",
+    SHA1 = "SHA-1",
+    SHA256 = "SHA-256",
 }
 
 function usePolling<T>(fetch: () => Promise<T>, intervalMs: number): T | undefined {
@@ -67,13 +74,10 @@ function Hashing() {
 
     const responsesRef = useRef<IHashResults[]>([])
 
-    const [md5, setMd5] = useState<boolean>(true);
-    const [sha1, setSha1] = useState<boolean>(false);
-    const [sha256, setSha256] = useState<boolean>(false);
-
+    const [hashTypes, setHashTypes] = useState<HashType[]>([HashType.MD5])
     const [fullPath, setFullPath] = useState<string>("/home/atola/test-samples");
 
-    const error = !md5 && !sha1 && !sha256
+    const error = hashTypes.length === 0;
 
     useEffect(() => {
         document.title = "Multi-Hasher 3000";
@@ -88,18 +92,25 @@ function Hashing() {
         return () => localStorage.setItem("data", JSON.stringify(responsesRef.current));
     }, []);
 
+    function handleCheckBoxChange(e: ChangeEvent<HTMLInputElement>, hashType: HashType): void {
+        setHashTypes(prev => !e.target.checked ? prev.filter(it => it !== hashType).sort() : [...prev, hashType].sort());
+    }
+
     const handleRequestSending = (event: MouseEvent<HTMLButtonElement> | FormEvent) => {
         event.preventDefault();
 
         if (error) return;
 
         const taskId = generateRandomNumber(1, 1_000_000);
-        const request: IHashRequest = {taskId, fullPath, hashTypes: {md5, sha1, sha256}};
+        const request: IHashRequest = {taskId, fullPath, hashTypes};
+
+        console.log(`chosen hash types are `, hashTypes);
+        console.log(`request is `, request);
 
         try {
             axios.post(
                 HASH_REQUEST_URL,
-                JSON.stringify(request),
+                request,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -158,24 +169,16 @@ function Hashing() {
             <FormControl required error={error} sx={{my: 2}} component="fieldset" variant="standard">
                 <FormLabel component="legend">Hash types</FormLabel>
                 <FormGroup>
-                    <FormControlLabel
-                        control={
-                            <Checkbox checked={md5} onChange={(e) => setMd5(e.target.checked)} name="MD5"/>
-                        }
-                        label="MD-5"
-                    />
-                    <FormControlLabel
-                        control={
-                            <Checkbox checked={sha1} onChange={(e) => setSha1(e.target.checked)} name="SHA1"/>
-                        }
-                        label="SHA-1"
-                    />
-                    <FormControlLabel
-                        control={
-                            <Checkbox checked={sha256} onChange={(e) => setSha256(e.target.checked)} name="SHA256"/>
-                        }
-                        label="SHA-256"
-                    />
+                    {Object.values(HashType).map(hashType =>
+                        <FormControlLabel
+                            key={hashType}
+                            control={
+                                <Checkbox checked={hashTypes.includes(hashType)}
+                                          onChange={e => handleCheckBoxChange(e, hashType)}
+                                          name="MD5"/>
+                            }
+                            label={hashType}
+                        />)}
                 </FormGroup>
                 <FormHelperText>Check at least one</FormHelperText>
             </FormControl>
