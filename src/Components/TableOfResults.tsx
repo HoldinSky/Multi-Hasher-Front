@@ -62,7 +62,7 @@ const headCells: readonly HeadCell[] = [
     },
 ];
 
-const DEFAULT_ROWS_PER_PAGE = 10;
+const DEFAULT_ROWS_PER_PAGE = 5;
 
 function ResultsTableHead() {
     return (
@@ -80,6 +80,50 @@ function ResultsTableHead() {
             </TableRow>
         </TableHead>
     );
+}
+
+interface ResultTableBodyProps {
+    page: number,
+    rowsPerPage: number,
+    paddingHeight: number,
+    dataToRender: DataToRender[],
+    results: IHashResult[],
+}
+
+function ResultsTableBody(props: ResultTableBodyProps) {
+    const data = props.dataToRender;
+
+    return <TableBody>
+        {data
+            ? data.slice(props.page * props.rowsPerPage, props.page * props.rowsPerPage + props.rowsPerPage).map((value, index) => {
+                return (
+                    <TableRow
+                        hover
+                        tabIndex={-1}
+                        key={value.resId}
+                    >
+                        <TableCell component="th" scope="row" padding="normal" align="left">
+                            {value.resId}
+                        </TableCell>
+                        <TableCell align="left">{value.error ? "Yes" : "No"}</TableCell>
+                        <TableCell align="left">{value.hashType}</TableCell>
+                        <TableCell align="right">{value.size}</TableCell>
+                        <TableCell align="right"><Link to={"/details"}
+                                                       state={{hashResult: props.results[index],}}>{value.result}</Link></TableCell>
+                    </TableRow>
+                );
+            })
+            : null}
+        {props.paddingHeight > 0 && (
+            <TableRow
+                style={{
+                    height: props.paddingHeight,
+                }}
+            >
+                <TableCell colSpan={6}/>
+            </TableRow>
+        )}
+    </TableBody>
 }
 
 interface TableToolbarProps {
@@ -158,48 +202,22 @@ function TableOfResults(props: TableOfResultsProps) {
         [],
     );
 
+    const bodyProps: ResultTableBodyProps = {
+        dataToRender: dataToRenderRef.current,
+        page,
+        rowsPerPage,
+        results,
+        paddingHeight,
+    }
+
     return (
         <Box sx={{width: '100%'}}>
             <Paper sx={{width: '100%', mb: 2}}>
                 <TableToolbar clearHistoryHandler={props.clearHistoryHandler}/>
                 <TableContainer>
-                    <Table
-                        sx={{minWidth: 750}}
-                        aria-labelledby="tableTitle"
-                        size={'small'}
-                    >
+                    <Table sx={{minWidth: 750}} aria-labelledby="tableTitle" size={'small'}>
                         <ResultsTableHead/>
-                        <TableBody>
-                            {dataToRenderRef.current
-                                ? dataToRenderRef.current.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((value, index) => {
-                                    return (
-                                        <TableRow
-                                            hover
-                                            tabIndex={-1}
-                                            key={value.resId}
-                                        >
-                                            <TableCell component="th" scope="row" padding="normal" align="left">
-                                                {value.resId}
-                                            </TableCell>
-                                            <TableCell align="left">{value.error ? "Yes" : "No"}</TableCell>
-                                            <TableCell align="left">{value.hashType}</TableCell>
-                                            <TableCell align="right">{value.size}</TableCell>
-                                            <TableCell align="right"><Link to={"/details"}
-                                                                           state={{hashResult: results[index],}}>{value.result}</Link></TableCell>
-                                        </TableRow>
-                                    );
-                                })
-                                : null}
-                            {paddingHeight > 0 && (
-                                <TableRow
-                                    style={{
-                                        height: paddingHeight,
-                                    }}
-                                >
-                                    <TableCell colSpan={6}/>
-                                </TableRow>
-                            )}
-                        </TableBody>
+                        <ResultsTableBody {...bodyProps} />
                     </Table>
                 </TableContainer>
                 <TablePagination
