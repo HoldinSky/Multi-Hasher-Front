@@ -33,7 +33,8 @@ function TasksInProgress(props: TaskInProgressProps) {
                                 ", Hash types: " + entry.hashTypes +
                                 ", Content: " + entry.path +
                                 ", Progress: " + entry.progress +
-                                "%, Speed: " + entry.speed + " MB/s"}
+                                "%, Speed: " + entry.speed +
+                                " MB/s, Current: " + entry.currentHash}
                         />
                     </ListItem>
                     );

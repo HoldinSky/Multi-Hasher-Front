@@ -9,16 +9,17 @@ import {
     Typography
 } from "@mui/material";
 import {Link, useLocation} from "react-router-dom";
-import IHashResults from "../common/IHashResults";
+import IHashResult from "../common/IHashResult";
 import {ExpandLess, ExpandMore} from "@mui/icons-material";
 import {useState} from "react";
+import TableOfHashes, {HashData} from "./TableOfHashes";
 
 const open = [false, false, false];
 
 export default function HashDetails() {
     const location = useLocation();
     const {hashResult} = location.state;
-    const data = hashResult as IHashResults
+    const data = hashResult as IHashResult
 
     const [dummy, setDummy] = useState({});
 
@@ -73,23 +74,18 @@ export default function HashDetails() {
                                 Hash results
                             </Typography>
                         </ListItem>
-                        {hashes.map((entry, index) =>
-                            <div key={"div-" + entry[0]}>
+
+                        {hashes.map((entry, index) => {
+                            return <div key={"div-" + entry[0]}>
                                 <ListItemButton onClick={e => handleClick(index)} key={"button-" + entry[0]}>
                                     <ListItemText primary={entry[0]}/>
                                     {open[index] ? <ExpandLess/> : <ExpandMore/>}
                                 </ListItemButton>
                                 <Collapse in={open[index]} timeout="auto" unmountOnExit key={"collapse-" + entry[0]}>
-                                    <List component="div" disablePadding key={"sublist-" + entry[0]}>
-                                        {Object.entries(entry[1]).map(value =>
-                                            <Typography variant="h6" component="div" key={value[0]}>
-                                                {(value[0].length > 25 ? (value[0].slice(0, 15) + "..." + value[0].slice(-9)) : value[0]) + " - " + value[1]}
-                                            </Typography>
-                                        )}
-                                    </List>
+                                    <TableOfHashes dataToDisplay={parseHashesToRenderHashData(entry[1])}/>
                                 </Collapse>
                             </div>
-                        )}
+                        })}
                     </List>
 
                     <Typography sx={{fontSize: 14, my: 0}} color="text.secondary">
@@ -106,4 +102,8 @@ export default function HashDetails() {
             </Card>
         </Box>
     </>
+}
+
+function parseHashesToRenderHashData(hashes: Map<string, string>): Array<HashData> {
+    return Object.entries(hashes).map(entry => { return {content: entry[0], hash: entry[1]} as HashData })
 }
