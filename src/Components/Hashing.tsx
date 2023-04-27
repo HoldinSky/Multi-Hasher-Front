@@ -1,4 +1,4 @@
-import {ChangeEvent, FormEvent, MouseEvent, useEffect, useRef, useState} from "react";
+import {ChangeEvent, Dispatch, FormEvent, MouseEvent, SetStateAction, useEffect, useRef, useState} from "react";
 import {
     Box,
     Button,
@@ -34,7 +34,6 @@ export interface ITaskInProgress {
     hashTypes: string;
     progress: number;
     speed: number;
-    currentHash: string;
     status: string;
 }
 
@@ -87,22 +86,58 @@ async function getFinishedTask(taskId: number): Promise<IHashResult> {
     return EMPTY_RESULT;
 }
 
+interface InputForHashingProps {
+    fullPath: string,
+    setFullPath: Dispatch<SetStateAction<string>>
+    error: boolean,
+    hashTypes: HashType[],
+    handleCheckBox: (event: ChangeEvent<HTMLInputElement>, value: HashType) => void,
+    handleRequest: (event: MouseEvent<HTMLButtonElement> | FormEvent) => void,
+}
+
+function InputForHashing(props: InputForHashingProps) {
+    return <>
+        <TextField
+            label="Full path to content"
+            value={props.fullPath}
+            variant="outlined"
+            onChange={(e) => props.setFullPath(e.target.value)}
+            sx={{marginBottom: '1.5rem'}}
+        />
+        <FormControl required error={props.error} sx={{my: 2}} component="fieldset" variant="standard">
+            <FormLabel component="legend">Hash types</FormLabel>
+            <FormGroup>
+                {Object.entries(HashType).map((value) =>
+                    <FormControlLabel
+                        key={value[0]}
+                        control={
+                            <Checkbox checked={props.hashTypes.includes(value[1])}
+                                      onChange={e => props.handleCheckBox(e, value[1])}
+                                      name="MD5"/>
+                        }
+                        label={value[1]}
+                    />)}
+            </FormGroup>
+            <FormHelperText>Check at least one</FormHelperText>
+        </FormControl>
+        <Button variant="contained" onClick={props.handleRequest}
+                sx={{
+                    width: '100%',
+                    my: '0.5rem'
+                }}
+                endIcon={<SendIcon/>}
+        >Hash data</Button>
+    </>
+}
+
 function Hashing() {
     const progresses = usePolling(getTasksInProgress, 500);
-
     useEffect(() => {
         progresses?.forEach((entry) => {
             if (entry.status === "FINISHED")
                 getFinishedTask(entry.taskId).then(data => responsesRef.current.push(data))
         });
     }, [progresses]);
-
-    const responsesRef = useRef<IHashResult[]>([])
-
-    const [hashTypes, setHashTypes] = useState<HashType[]>([HashType.MD5, HashType.SHA1, HashType.SHA256])
-    const [fullPath, setFullPath] = useState<string>("/home/atola/test-samples");
-
-    const error = hashTypes.length === 0;
 
     useEffect(() => {
         const data = localStorage.getItem("data");
@@ -113,11 +148,17 @@ function Hashing() {
         return () => localStorage.setItem("data", JSON.stringify(responsesRef.current));
     }, []);
 
+    const [hashTypes, setHashTypes] = useState<HashType[]>([HashType.MD5, HashType.SHA1, HashType.SHA256])
+    const [fullPath, setFullPath] = useState<string>("/home/atola/test-samples/Kingston DataTraveler 2.0 001372708ADBF9A196310CC5.E01");
+    const error = hashTypes.length === 0;
+
+    const responsesRef = useRef<IHashResult[]>([])
+
     function handleCheckBoxChange(e: ChangeEvent<HTMLInputElement>, hashType: HashType): void {
         setHashTypes(prev => !e.target.checked ? prev.filter(it => it !== hashType).sort() : [...prev, hashType].sort());
     }
 
-    const handleRequestSending = (event: MouseEvent<HTMLButtonElement> | FormEvent) => {
+    function handleRequestSending(event: MouseEvent<HTMLButtonElement> | FormEvent) {
         event.preventDefault();
 
         if (error) return;
@@ -145,7 +186,7 @@ function Hashing() {
         }
     }
 
-    const handleStopRequest = async (id: number, event: MouseEvent<HTMLButtonElement> | FormEvent) => {
+    async function handleStopRequest(id: number, event: MouseEvent<HTMLButtonElement> | FormEvent) {
         event.preventDefault();
 
         try {
@@ -175,36 +216,9 @@ function Hashing() {
             justifyContent={"center"}
             onSubmit={(e) => handleRequestSending(e)}
         >
-            <TextField
-                label="Full path to content"
-                value={fullPath}
-                variant="outlined"
-                onChange={(e) => setFullPath(e.target.value)}
-                sx={{marginBottom: '1.5rem'}}
-            />
-            <FormControl required error={error} sx={{my: 2}} component="fieldset" variant="standard">
-                <FormLabel component="legend">Hash types</FormLabel>
-                <FormGroup>
-                    {Object.entries(HashType).map((value) =>
-                        <FormControlLabel
-                            key={value[0]}
-                            control={
-                                <Checkbox checked={hashTypes.includes(value[1])}
-                                          onChange={e => handleCheckBoxChange(e, value[1])}
-                                          name="MD5"/>
-                            }
-                            label={value[1]}
-                        />)}
-                </FormGroup>
-                <FormHelperText>Check at least one</FormHelperText>
-            </FormControl>
-            <Button variant="contained" onClick={handleRequestSending}
-                    sx={{
-                        width: '100%',
-                        my: '0.5rem'
-                    }}
-                    endIcon={<SendIcon/>}
-            >Hash data</Button>
+            <InputForHashing fullPath={fullPath} setFullPath={setFullPath}
+                             error={error} hashTypes={hashTypes}
+                             handleCheckBox={handleCheckBoxChange} handleRequest={handleRequestSending}/>
             <TasksInProgress tasksInProgress={progresses ? progresses : []} stopHandler={handleStopRequest}/>
             <TableOfResults finishedTasks={responsesRef.current} clearHistoryHandler={handleClearHistory}/>
         </Box>

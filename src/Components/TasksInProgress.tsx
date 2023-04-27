@@ -31,10 +31,9 @@ function TasksInProgress(props: TaskInProgressProps) {
                         <ListItemText
                             primary={"Task ID: " + entry.taskId +
                                 ", Hash types: " + entry.hashTypes +
-                                ", Content: " + entry.path +
+                                ", Content: " + (entry.path.length > 40 ? entry.path.slice(0, 19) + "..." + entry.path.slice(-19) : entry.path ) +
                                 ", Progress: " + entry.progress +
-                                "%, Speed: " + entry.speed +
-                                " MB/s, Current: " + entry.currentHash}
+                                "%, Speed: " + entry.speed + " MB/s"}
                         />
                     </ListItem>
                     );

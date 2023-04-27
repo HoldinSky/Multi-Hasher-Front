@@ -86,7 +86,7 @@ interface TableOfHashesProps {
 
 function TableOfHashes(props: TableOfHashesProps) {
     return (
-        <Paper style={{height: 400, width: "100%"}}>
+        <Paper style={{height: 300, width: "100%"}}>
             <TableVirtuoso
                 data={props.dataToDisplay}
                 components={VirtuosoTableComponents}

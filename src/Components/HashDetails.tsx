@@ -14,27 +14,10 @@ import {ExpandLess, ExpandMore} from "@mui/icons-material";
 import {useState} from "react";
 import TableOfHashes, {HashData} from "./TableOfHashes";
 
-const open = [false, false, false];
+const openTable = [false, false, false];
 
 interface ResultProps {
     id: number,
-}
-
-interface ErrorProps {
-    errorMessage: string,
-}
-
-interface HashResultsProps {
-    hashes: [string, any][],
-    handleClick: (index: number) => void,
-}
-
-interface ContentLocationProps {
-    contentLocation: string,
-}
-
-interface SizeProps {
-    sizeInMB: number,
 }
 
 function ResultIdBlock(props: ResultProps) {
@@ -46,6 +29,10 @@ function ResultIdBlock(props: ResultProps) {
             {props.id}
         </Typography>
     </>
+}
+
+interface ErrorProps {
+    errorMessage: string,
 }
 
 function ErrorBlock(props: ErrorProps) {
@@ -66,6 +53,11 @@ function ErrorBlock(props: ErrorProps) {
     </>
 }
 
+interface HashResultsProps {
+    hashes: [string, any][],
+    handleClick: (index: number) => void,
+}
+
 function HashResultsBlock(props: HashResultsProps) {
     return <>
         <List>
@@ -75,20 +67,23 @@ function HashResultsBlock(props: HashResultsProps) {
                 </Typography>
             </ListItem>
 
-            {props.hashes.map((entry, index) => {
+            {props.hashes.sort().map((entry, index) => {
                 return <div key={"div-" + entry[0]}>
-                    <ListItemButton onClick={e => props.handleClick(index)} key={"button-" + entry[0]}>
+                    <ListItemButton onClick={() => props.handleClick(index)} key={"button-" + entry[0]}>
                         <ListItemText primary={entry[0]}/>
-                        {open[index] ? <ExpandLess/> : <ExpandMore/>}
+                        {openTable[index] ? <ExpandLess/> : <ExpandMore/>}
                     </ListItemButton>
-                    <Collapse in={open[index]} timeout="auto" unmountOnExit key={"collapse-" + entry[0]}>
+                    <Collapse in={openTable[index]} timeout="auto" unmountOnExit key={"collapse-" + entry[0]}>
                         <TableOfHashes dataToDisplay={parseHashesToRenderHashData(entry[1])}/>
                     </Collapse>
                 </div>
             })}
-
         </List>
     </>
+}
+
+interface ContentLocationProps {
+    contentLocation: string,
 }
 
 function ContentLocationBlock(props: ContentLocationProps) {
@@ -100,6 +95,10 @@ function ContentLocationBlock(props: ContentLocationProps) {
             {props.contentLocation}
         </Typography>
     </>
+}
+
+interface SizeProps {
+    sizeInMB: number,
 }
 
 function SizeBlock(props: SizeProps) {
@@ -121,8 +120,8 @@ export default function HashDetails() {
     const [dummy, setDummy] = useState({});
 
     const handleExpandButtonClick = (num: number) => {
-        open[num] = !open[num];
-        setDummy({});
+        openTable[num] = !openTable[num];
+        setDummy({...dummy});
     };
 
     const hashes = Object.entries(data.results.hashes!!);
@@ -137,7 +136,7 @@ export default function HashDetails() {
                 <CardContent>
                     <ResultIdBlock id={data.resId}/>
                     {data.hasError ? <ErrorBlock errorMessage={data.results.error!!}/> : null}
-                    <ContentLocationBlock contentLocation={data.results.pathToContent} />
+                    <ContentLocationBlock contentLocation={data.results.pathToContent}/>
                     {hashes.length ? <HashResultsBlock hashes={hashes} handleClick={handleExpandButtonClick}/> : null}
                     {!data.hasError ? <SizeBlock sizeInMB={data.size}/> : null}
                 </CardContent>
