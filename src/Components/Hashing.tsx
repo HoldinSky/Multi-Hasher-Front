@@ -125,8 +125,8 @@ function InputForHashing(props: InputForHashingProps) {
                     width: '100%',
                     my: '0.5rem'
                 }}
-                endIcon={<SendIcon/>}
-        >Hash data</Button>
+                endIcon={<SendIcon color="secondary"/>}
+        ><p style={{fontWeight: "bolder", margin: 0, color: "#3272ff"}}>Hash data</p></Button>
     </>
 }
 

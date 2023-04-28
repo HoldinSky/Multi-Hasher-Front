@@ -19,6 +19,14 @@ const App: FC = () => {
                 "sans-serif",
             ].join(","),
         },
+        palette: {
+            primary: {
+                main: "#ffa330",
+            },
+            secondary: {
+                main: "#3272ff",
+            }
+        },
     });
 
     return (

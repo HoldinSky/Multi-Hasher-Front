@@ -47,7 +47,7 @@ export default function NavigationBar() {
     return (
         <Box sx={{display: 'flex'}}>
             <CssBaseline/>
-            <AppBar component="nav">
+            <AppBar component="nav" color="primary">
                 <Toolbar>
                     <IconButton
                         color="inherit"
@@ -63,11 +63,11 @@ export default function NavigationBar() {
                         component="div"
                         sx={{flexGrow: 1, display: {xs: 'none', sm: 'block'}}}
                     >
-                        <Link to={"/hashing"} style={{textDecoration: "none", color: "white"}}>Multi-Hasher 3000</Link>
+                        <Link to={"/hashing"} style={{textDecoration: "none", color: "#3272ff"}}>Multi-Hasher 3000</Link>
                     </Typography>
                     <Box sx={{display: {xs: 'none', sm: 'block'}}}>
                         {navItems.map((item) => (
-                            <Button key={item} sx={{color: '#fff'}} href={item === 'Home' ? "/" : (item === "Calculate Hash" ? "/hashing" : "/")}>
+                            <Button key={item} color="secondary" style={{fontWeight: "bolder"}} href={item === 'Home' ? "/" : (item === "Calculate Hash" ? "/hashing" : "/")}>
                                 {item}
                             </Button>
                         ))}
