@@ -104,7 +104,7 @@ function InputForHashing(props: InputForHashingProps) {
             onChange={(e) => props.setFullPath(e.target.value)}
             sx={{marginBottom: '1.5rem'}}
         />
-        <FormControl required error={props.error} sx={{my: 2}} component="fieldset" variant="standard">
+        <FormControl required error={props.error} sx={{mb: 1}} component="fieldset" variant="standard">
             <FormLabel component="legend">Hash types</FormLabel>
             <FormGroup>
                 {Object.entries(HashType).map((value) =>

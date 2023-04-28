@@ -12,9 +12,10 @@ import {
 } from "@mui/material";
 import {useState} from "react";
 import MenuIcon from '@mui/icons-material/Menu';
+import {Link} from "react-router-dom";
 
 const drawerWidth = 240;
-const navItems = ['Home', 'Calculate Hash'];
+const navItems = ['Home'];
 
 export default function NavigationBar() {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -32,7 +33,7 @@ export default function NavigationBar() {
             <List>
                 {navItems.map((item) => (
                     <ListItem key={item} disablePadding>
-                        <ListItemButton sx={{textAlign: 'center'}} href={item === 'Home' ? "/" : (item === "Calculate Hash" ? "/hashing" : "/")}>
+                        <ListItemButton sx={{textAlign: 'center'}} href={item === 'Home' ? "/" : "#"}>
                             <ListItemText primary={item}/>
                         </ListItemButton>
                     </ListItem>
@@ -62,7 +63,7 @@ export default function NavigationBar() {
                         component="div"
                         sx={{flexGrow: 1, display: {xs: 'none', sm: 'block'}}}
                     >
-                        Multi-Hasher 3000
+                        <Link to={"/hashing"} style={{textDecoration: "none", color: "white"}}>Multi-Hasher 3000</Link>
                     </Typography>
                     <Box sx={{display: {xs: 'none', sm: 'block'}}}>
                         {navItems.map((item) => (
